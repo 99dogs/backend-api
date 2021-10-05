@@ -14,14 +14,14 @@ public class ConnectionFactory {
 
 	private static Connection connection = null;	
 	
-	private static String url;
+	private static String host;
 	private static String databaseName;
 	private static String user;
 	private static String password;
 	
-	@Value("${database_url}")
-	public void setUrl(String data) {
-		ConnectionFactory.url = data;
+	@Value("${database_host}")
+	public void setHost(String data) {
+		ConnectionFactory.host = data;
 	}
 	
 	@Value("${database_name_database}")
@@ -43,7 +43,7 @@ public class ConnectionFactory {
 
 		try {
 
-			connection = DriverManager.getConnection(url+"/"+databaseName, user, password);
+			connection = DriverManager.getConnection(host+"/"+databaseName, user, password);
 			
 		} catch (SQLException e) {
 			System.out.println("Ocorreu um erro ao obter a instancia do banco de dados: " + e.getMessage());
