@@ -36,8 +36,8 @@ public class UsuarioDaoImpl implements UsuarioDao {
 		PreparedStatement ps = null;
 		ResultSet resultSet = null;
 
-		String sql = "insert into usuario (criado, modificado, nome, email, senha, tipo, cidade_id, estado_id)";
-		sql += " VALUES (?,?,?,?,?,?,?,?); ";
+		String sql = "insert into usuario (criado, modificado, nome, email, senha, tipo, cidade_id, estado_id,foto_url)";
+		sql += " VALUES (?,?,?,?,?,?,?,?,?); ";
 
 		try {
 
@@ -54,6 +54,7 @@ public class UsuarioDaoImpl implements UsuarioDao {
 			ps.setString(6, entity.getTipo().toUpperCase());
 			ps.setInt(7, 2225);
 			ps.setInt(8, 13);
+			ps.setString(9, "");
 
 			ps.execute();
 
