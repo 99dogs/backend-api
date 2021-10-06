@@ -257,4 +257,41 @@ public class TicketRestController {
 		
 	}
 	
+	@ApiOperation("Endpoint para aprovar o pagamento do ticket")
+	@RequestMapping(value="/aprovar-pagamento/{ticketId}", method = RequestMethod.PUT, produces = {"application/json; charset=utf-8"})
+	public ResponseEntity<Object> aprovarPagamento(@PathVariable Long ticketId){
+		
+		ResponseData responseData = new ResponseData();
+		
+		try {
+			
+			Ticket ticket = ticketService.buscarPorId(ticketId);
+			
+			if(ticket == null || ticket.getId() == null || ticket.getId() == 0) {
+				throw new Exception("Ticket informado não foi encontrado.");
+			}
+			
+			boolean pago = ticketService.setarComoPago(ticketId);
+			
+			if(pago == false) {
+				throw new Exception("Ocorreu algum problema ao marcar o ticket como pago.");
+			}
+			
+			boolean creditado = ticketService.creditarComprador(ticketId);
+			
+			if(creditado == false) {
+				ticketService.setarComoPendente(ticketId);
+				throw new Exception("Ocorreu algum problema ao marcar o ticket como pago e creditar o comprador.");
+			}
+			
+			return ResponseEntity.ok().build();
+			
+		} catch (Exception e) {
+			responseData.setTemErro(true);
+			responseData.setMensagem(e.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
+		}
+		
+	}
+	
 }
