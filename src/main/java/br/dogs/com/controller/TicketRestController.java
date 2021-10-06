@@ -267,6 +267,10 @@ public class TicketRestController {
 			
 			Ticket ticket = ticketService.buscarPorId(ticketId);
 			
+			if(ticket.isPago() == true) {
+				throw new Exception("Ticket já consta como pago.");
+			}
+			
 			if(ticket == null || ticket.getId() == null || ticket.getId() == 0) {
 				throw new Exception("Ticket informado não foi encontrado.");
 			}
