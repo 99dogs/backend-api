@@ -36,6 +36,16 @@ public class Usuario extends BaseEntity implements UserDetails, GrantedAuthority
 	private Estado estado;
 	@JsonIgnore
 	private List<Passeio> passeios;
+	@JsonIgnore
+	private String tokenPushNotification;
+
+	public String getTokenPushNotification() {
+		return tokenPushNotification;
+	}
+
+	public void setTokenPushNotification(String tokenPushNotification) {
+		this.tokenPushNotification = tokenPushNotification;
+	}
 
 	public String getFotoUrl() {
 		return fotoUrl;

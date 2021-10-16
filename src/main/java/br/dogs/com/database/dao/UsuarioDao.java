@@ -32,4 +32,6 @@ public interface UsuarioDao {
 	
 	public Long retornaQtdePasseiosEfetuados(Long id);
 	
+	public boolean atualizarTokenPushNotification(Long id, String token);
+	
 }

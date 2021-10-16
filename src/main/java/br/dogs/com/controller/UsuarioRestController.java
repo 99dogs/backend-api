@@ -41,6 +41,7 @@ import br.dogs.com.model.dto.UsuarioAutenticado;
 import br.dogs.com.model.dto.UsuarioLogin;
 import br.dogs.com.model.dto.UsuarioRegistro;
 import br.dogs.com.model.dto.UsuarioSocialLogin;
+import br.dogs.com.model.dto.push_notificacation.NewToken;
 import br.dogs.com.model.entities.Cidade;
 import br.dogs.com.model.entities.Estado;
 import br.dogs.com.model.entities.Usuario;
@@ -517,6 +518,50 @@ public class UsuarioRestController {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
 			
 		}
+		
+	}
+	
+	@RequestMapping(value="/atualizar-token-push-notification", method = RequestMethod.PUT, produces = {"application/json; charset=utf-8"})
+	public ResponseEntity<Object> atualizarTokenPushNotification(@RequestBody NewToken newToken){
+		
+		ResponseData responseData = new ResponseData();
+		Usuario usuario = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		
+		try {
+			
+			if(newToken.getUsuarioId() == null || newToken.getUsuarioId() == 0) {
+				throw new Exception("É necessário informar o usuario id");
+			}
+			
+			if(newToken.getToken() == null || newToken.getToken().isBlank()) {
+				throw new Exception("É necessário informar o token");
+			}
+			
+			if(newToken.getUsuarioId() != usuario.getId()) {
+				throw new Exception("Você não possui permissão para acessar esse objeto.");
+			}
+			
+			Usuario dadosUsuario = usuarioService.buscarPorId(newToken.getUsuarioId());
+
+			if(dadosUsuario == null || dadosUsuario.getId() == null || dadosUsuario.getId() == 0) {
+				responseData.setTemErro(true);
+				responseData.setMensagem("Usuário informado não foi encontrado.");
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseData);
+			}
+			
+			boolean atualizado = usuarioService.atualizarTokenPushNotification(usuario.getId(), newToken.getToken());
+			
+			if(atualizado == false) {
+				throw new Exception("Ocorreu um problema ao atualizar o token do usuário.");
+			}
+			
+			return ResponseEntity.ok().build();
+			
+		} catch (Exception e) {
+			responseData.setTemErro(true);
+			responseData.setMensagem(e.getMessage());
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
+		}		
 		
 	}
 	

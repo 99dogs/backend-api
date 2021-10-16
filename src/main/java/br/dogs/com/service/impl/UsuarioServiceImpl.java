@@ -124,4 +124,9 @@ public class UsuarioServiceImpl implements UsuarioService {
 		return usuarioDao.retornaQtdePasseiosEfetuados(id);
 	}
 
+	@Override
+	public boolean atualizarTokenPushNotification(Long id, String token) {
+		return usuarioDao.atualizarTokenPushNotification(id, token);
+	}
+
 }

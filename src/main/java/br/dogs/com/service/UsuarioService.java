@@ -38,4 +38,6 @@ public interface UsuarioService extends UserDetailsService {
 	
 	public Long retornaQtdePasseiosEfetuados(Long id);
 	
+	public boolean atualizarTokenPushNotification(Long id, String token);
+	
 }

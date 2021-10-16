@@ -2,6 +2,7 @@ package br.dogs.com.controller;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +20,16 @@ import br.dogs.com.helper.PasseioStatus;
 import br.dogs.com.helper.TipoUsuario;
 import br.dogs.com.model.dto.PasseioLatLong;
 import br.dogs.com.model.dto.ResponseData;
+import br.dogs.com.model.dto.push_notificacation.Data;
+import br.dogs.com.model.dto.push_notificacation.Message;
+import br.dogs.com.model.dto.push_notificacation.Notification;
 import br.dogs.com.model.entities.Cachorro;
 import br.dogs.com.model.entities.Passeio;
 import br.dogs.com.model.entities.Usuario;
 import br.dogs.com.service.CachorroService;
 import br.dogs.com.service.HorarioService;
 import br.dogs.com.service.PasseioService;
+import br.dogs.com.service.PushNotificationService;
 import br.dogs.com.service.SaldoService;
 import br.dogs.com.service.TicketService;
 import br.dogs.com.service.UsuarioService;
@@ -52,6 +57,9 @@ public class PasseioRestController {
 	
 	@Autowired
 	private TicketService ticketService;
+	
+	@Autowired
+	private PushNotificationService pushNotificationService;
 	
 	@ApiOperation("Endpoint para solicitar um novo passeio.")
 	@RequestMapping(method = RequestMethod.POST, produces = {"application/json; charset=utf-8"})
@@ -116,7 +124,9 @@ public class PasseioRestController {
 			
 			passeio.setTutorId(usuario.getId());
 			Passeio passeioSolicitado = passeioService.solicitar(passeio);
-					
+			
+			pushNotificationService.passeioSolicitado(passeio.getId());
+			
 			return ResponseEntity.ok(passeioSolicitado);
 			
 		} catch (Exception e) {
@@ -223,6 +233,8 @@ public class PasseioRestController {
 				throw new Exception("Ocorreu algum problema ao atualizar o status do passeio.");
 			}
 			
+			pushNotificationService.passeioAceito(id);
+			
 			ticketService.debitarComprador(passeio.getTutorId());
 			
 			return ResponseEntity.ok().build();
@@ -267,7 +279,9 @@ public class PasseioRestController {
 			if(statusAlterado == false) {
 				throw new Exception("Ocorreu algum problema ao atualizar o status do passeio.");
 			}
-						
+			
+			pushNotificationService.passeioRecusado(id);
+			
 			return ResponseEntity.ok().build();
 			
 		} catch (Exception e) {
@@ -354,7 +368,11 @@ public class PasseioRestController {
 				throw new Exception("Ocorreu algum problema ao atualizar o status do passeio.");
 			}
 			
-			saldoService.creditarSaldo(id);
+			boolean saldoCreditado = saldoService.creditarSaldo(id);
+			
+			if(saldoCreditado == true) {
+				pushNotificationService.saldoCreditado(id);
+			}
 			
 			return ResponseEntity.ok().build();
 			
@@ -510,6 +528,39 @@ public class PasseioRestController {
 			responseData.setMensagem(e.getMessage());
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseData);
 		}
+		
+	}
+	
+	@RequestMapping(value="/testejson/{passeioId}", method = RequestMethod.GET, produces = {"application/json; charset=utf-8"})
+	public ResponseEntity<Object> testejson(@PathVariable Long passeioId) {
+		
+		
+		Passeio passeio = passeioService.buscarPorId(passeioId);
+		
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+		
+		Message message = new Message();
+		Notification notification = new Notification();
+		Data data = new Data();
+		HashMap<String, String> payload = new HashMap<>();
+		
+		String body = passeio.getTutor().getNome() + ", seu passeio para o dia " + passeio.getDatahora().format(formatter) + " foi aceito.";
+		
+		notification.setTitle("Boas novas sobre seu passeio.");
+		notification.setBody(body);
+		
+		payload.put("sub", passeio.getTutorId().toString());
+		
+		data.setClick_action("FLUTTER_NOTIFICATION_CLICK");
+		data.setId(String.valueOf(System.currentTimeMillis()));
+		data.setPayload(payload);
+		
+		message.setNotification(notification);
+		message.setData(data);
+		message.setPriority("high");
+		message.setTo("token");
+		
+		return ResponseEntity.ok(message);
 		
 	}
 	

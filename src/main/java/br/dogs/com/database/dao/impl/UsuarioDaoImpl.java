@@ -128,6 +128,7 @@ public class UsuarioDaoImpl implements UsuarioDao {
 				usuario.setCep(resultSet.getString("cep"));
 				usuario.setQtdeTicketDisponivel(resultSet.getInt("qtde_ticket_disponivel"));
 				usuario.setFotoUrl(resultSet.getString("foto_url"));
+				usuario.setTokenPushNotification(resultSet.getString("token_push_notification"));
 				
 				estado.setId(resultSet.getLong("estado_id"));
 				estado.setNome(resultSet.getString("est_nome"));
@@ -512,6 +513,49 @@ public class UsuarioDaoImpl implements UsuarioDao {
 		}
 		
 		return quantidade;
+		
+	}
+
+	@Override
+	public boolean atualizarTokenPushNotification(Long id, String token) {
+		
+		Connection connection = null;
+		PreparedStatement ps = null;
+
+		String sql = " update usuario set modificado=?, token_push_notification=? where id=? ";
+
+		try {
+
+			connection = ConnectionFactory.getConnection();
+			connection.setAutoCommit(false);
+
+			ps = connection.prepareStatement(sql);
+
+			ps.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+			ps.setString(2, token);
+			ps.setLong(3, id);
+
+			ps.execute();
+
+			connection.commit();
+
+			return true;
+			
+		} catch (Exception e) {
+
+			logger.error(e.getMessage());
+
+			try {
+				connection.rollback();
+			} catch (SQLException e1) {
+				logger.error(e1.getMessage());
+			}
+
+		} finally {
+			ConnectionFactory.close(ps, connection);
+		}
+
+		return false;
 		
 	}
 	
