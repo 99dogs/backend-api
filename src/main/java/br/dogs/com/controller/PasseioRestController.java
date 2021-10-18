@@ -125,7 +125,7 @@ public class PasseioRestController {
 			passeio.setTutorId(usuario.getId());
 			Passeio passeioSolicitado = passeioService.solicitar(passeio);
 			
-			pushNotificationService.passeioSolicitado(passeio.getId());
+			pushNotificationService.passeioSolicitado(passeioSolicitado.getId());
 			
 			return ResponseEntity.ok(passeioSolicitado);
 			
