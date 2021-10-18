@@ -40,7 +40,9 @@ public class UsuarioDaoImpl implements UsuarioDao {
 		sql += " VALUES (?,?,?,?,?,?,?,?,?); ";
 
 		try {
-
+			
+			String fotoUrl = "https://ui-avatars.com/api/?background=280059&color=fff&name="+entity.getNome()+"&rounded=true&bold=true";
+			
 			connection = ConnectionFactory.getConnection();
 			connection.setAutoCommit(false);
 
@@ -54,7 +56,7 @@ public class UsuarioDaoImpl implements UsuarioDao {
 			ps.setString(6, entity.getTipo().toUpperCase());
 			ps.setInt(7, 2225);
 			ps.setInt(8, 13);
-			ps.setString(9, "");
+			ps.setString(9, fotoUrl);
 
 			ps.execute();
 
